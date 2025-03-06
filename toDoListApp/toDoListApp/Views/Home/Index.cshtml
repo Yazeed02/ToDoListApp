@@ -1,0 +1,154 @@
+﻿@model List<toDoListApp.Models.ToDoItem>
+@{
+    ViewData["Title"] = "To-Do List";
+}
+
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="task-wrapper">
+        <!-- Header & Theme Toggle -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold"><i class="fas fa-list-check me-2"></i> My Tasks</h2>
+            <button class="btn btn-outline-secondary theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+        <!-- Add Task Input -->
+        <div class="task-card p-4">
+            @using (Html.BeginForm("AddTask", "Home", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="input-group mb-3">
+                    <input type="text" name="Task" placeholder="What needs to be done?" required class="form-control form-control-lg rounded-start" />
+                    <button type="submit" class="btn btn-primary btn-lg rounded-end"><i class="fas fa-plus"></i></button>
+                </div>
+            }
+
+            <!-- Task List -->
+            <ul class="list-group">
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var task in Model)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center task-item @(task.IsCompleted ? "completed" : "")">
+                            <div class="d-flex align-items-center">
+                                <!-- Task Completion Checkbox -->
+                                @using (Html.BeginForm("ToggleComplete", "Home", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <input type="checkbox" onchange="this.form.submit()" @(task.IsCompleted ? "checked" : "") class="form-check-input me-3">
+                                }
+                                <span>@task.Task</span>
+                            </div>
+                            <div>
+                                @using (Html.BeginForm("DeleteTask", "Home", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                }
+                            </div>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item text-muted text-center"><i class="fas fa-check-circle"></i> No tasks yet! Add one above.</li>
+                }
+            </ul>
+        </div>
+        <!-- Success & Error Messages -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success fade show">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger fade show">@TempData["Error"]</div>
+        }
+    </div>
+</div>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<!-- Custom Styles -->
+<style>
+    /* Centered & Smaller Task List */
+    .task-wrapper {
+        width: 50%;
+        max-width: 500px;
+    }
+
+    /* Task Card */
+    .task-card {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        transition: 0.3s;
+    }
+
+    /* Dark Mode */
+    body.dark-mode {
+        background-color: #121212;
+        color: white;
+    }
+
+        body.dark-mode .task-card {
+            background: #1e1e1e;
+        }
+
+        body.dark-mode .list-group-item {
+            background-color: #222;
+            color: white;
+        }
+
+        body.dark-mode .btn-outline-secondary {
+            color: white;
+            border-color: white;
+        }
+
+    /* Task List */
+    .list-group-item {
+        border-radius: 10px;
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease-in-out;
+    }
+
+        .list-group-item:hover {
+            background-color: #e9ecef;
+        }
+
+    /* Dark Mode Adjustments */
+    body.dark-mode .list-group-item {
+        background-color: #2b2b2b;
+    }
+
+        body.dark-mode .list-group-item:hover {
+            background-color: #3a3a3a;
+        }
+
+    /* Task Completed Style */
+    .task-item.completed span {
+        text-decoration: line-through;
+        color: #6c757d;
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+        font-size: 1.2rem;
+        padding: 6px 12px;
+        border-radius: 50%;
+    }
+</style>
+
+<!-- Dark Mode Toggle Script -->
+<script>
+    function toggleTheme() {
+        document.body.classList.toggle("dark-mode");
+    }
+</script>
